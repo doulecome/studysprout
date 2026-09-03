@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>学苗 · 专注苗圃</title>
+<style>
+  :root{
+    --bg:#f4f7f3; --card:#ffffff; --ink:#2f3a33; --sub:#7b8a80;
+    --green:#3a7d5d; --green-l:#eaf4ee; --green-mid:#7bbf9a;
+    --amber:#e0a64b; --ring:#dfe8e1; --red:#d9776b;
+    --shadow:0 2px 10px rgba(58,125,93,.08);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;}
+  .app{max-width:460px;margin:0 auto;min-height:100vh;padding:0 0 76px;position:relative;}
+  .top{padding:18px 18px 6px;}
+  .top h1{font-size:20px;margin:0;letter-spacing:1px;display:flex;align-items:center;gap:8px;}
+  .top .tag{font-size:11px;color:var(--sub);background:var(--green-l);
+    padding:2px 8px;border-radius:20px;font-weight:400;}
+  .top p{margin:6px 0 0;font-size:12px;color:var(--sub);line-height:1.5;}
+  .screen{display:none;padding:14px 16px 0;}
+  .screen.on{display:block;}
+  .card{background:var(--card);border-radius:18px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px;}
+  .card h2{font-size:14px;margin:0 0 12px;color:var(--ink);font-weight:600;}
+  /* subject chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;}
+  .chip{padding:8px 14px;border-radius:20px;background:var(--green-l);color:var(--green);
+    font-size:13px;border:1.5px solid transparent;cursor:pointer;user-select:none;transition:.15s;}
+  .chip.on{background:var(--green);color:#fff;border-color:var(--green);}
+  .chip .x{opacity:.5;margin-left:6px;font-size:11px;}
+  .add-sub{display:flex;gap:8px;margin-top:10px;}
+  .add-sub input{flex:1;border:1px solid var(--ring);background:#fbfdfb;border-radius:12px;
+    padding:9px 12px;font-size:14px;outline:none;color:var(--ink);}
+  /* timer */
+  .timer-wrap{display:flex;flex-direction:column;align-items:center;padding:6px 0 2px;}
+  .ring{position:relative;width:180px;height:180px;}
+  .ring svg{transform:rotate(-90deg);}
+  .ring .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .ring .tree{font-size:46px;line-height:1;}
+  .ring .time{font-size:26px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums;}
+  .ring .sub{font-size:11px;color:var(--sub);margin-top:2px;}
+  .big-btn{width:100%;border:none;border-radius:16px;padding:15px;font-size:16px;font-weight:600;
+    color:#fff;background:var(--green);cursor:pointer;margin-top:14px;box-shadow:var(--shadow);}
+  .big-btn.ghost{background:#fff;color:var(--green);border:1.5px solid var(--green);}
+  .big-btn:active{transform:scale(.99);}
+  .big-btn[disabled]{opacity:.5;}
+  /* daily goal + streak row */
+  .gostats{display:flex;gap:12px;margin-top:4px;}
+  .gostat{flex:1;background:var(--green-l);border-radius:14px;padding:12px;text-align:center;}
+  .gostat .n{font-size:22px;font-weight:700;color:var(--green);}
+  .gostat .l{font-size:11px;color:var(--sub);margin-top:2px;}
+  /* quick log */
+  .qlog{display:flex;flex-direction:column;gap:10px;}
+  .qrow{display:flex;gap:8px;align-items:center;}
+  .qrow select,.qrow input{flex:1;border:1px solid var(--ring);background:#fbfdfb;border-radius:12px;
+    padding:10px 12px;font-size:14px;outline:none;color:var(--ink);}
+  .qrow .amt{width:84px;flex:none;}
+  .seg{display:flex;gap:6px;}
+  .seg button{flex:1;border:1px solid var(--ring);background:#fff;border-radius:10px;padding:8px 0;
+    font-size:12px;color:var(--sub);cursor:pointer;}
+  .seg button.on{background:var(--green);color:#fff;border-color:var(--green);}
+  /* records */
+  .sum3{display:flex;gap:10px;margin-bottom:14px;}
+  .sum3 .s{flex:1;background:var(--card);border-radius:14px;padding:12px;text-align:center;box-shadow:var(--shadow);}
+  .sum3 .s .n{font-size:20px;font-weight:700;color:var(--green);}
+  .sum3 .s .l{font-size:10px;color:var(--sub);margin-top:3px;}
+  .daygrp{margin-bottom:12px;}
+  .daygrp .dh{font-size:12px;color:var(--sub);margin:8px 2px 6px;display:flex;justify-content:space-between;}
+  .ev{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:14px;
+    padding:11px 14px;margin-bottom:8px;box-shadow:var(--shadow);}
+  .ev .ic{font-size:22px;width:30px;text-align:center;}
+  .ev .meta{flex:1;min-width:0;}
+  .ev .meta .t{font-size:14px;font-weight:600;}
+  .ev .meta .d{font-size:11px;color:var(--sub);margin-top:1px;}
+  .ev .amt{font-size:13px;color:var(--green);font-weight:600;white-space:nowrap;}
+  .empty{text-align:center;color:var(--sub);font-size:13px;padding:30px 0;}
+  /* connect */
+  .code{background:#26322c;color:#cfe6d8;border-radius:12px;padding:12px;font-size:11px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-all;
+    max-height:200px;overflow:auto;line-height:1.5;}
+  .steps{font-size:13px;color:var(--ink);line-height:1.7;padding-left:18px;margin:10px 0 0;}
+  .steps li{margin-bottom:6px;}
+  .toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+    background:rgba(47,58,51,.92);color:#fff;padding:10px 18px;border-radius:12px;font-size:14px;
+    z-index:99;opacity:0;transition:.2s;pointer-events:none;}
+  .toast.show{opacity:1;}
+  /* bottom nav */
+  .nav{position:fixed;left:0;right:0;bottom:0;max-width:460px;margin:0 auto;
+    display:flex;background:#fff;border-top:1px solid var(--ring);box-shadow:0 -2px 12px rgba(0,0,0,.04);}
+  .nav button{flex:1;border:none;background:none;padding:10px 0 8px;font-size:11px;color:var(--sub);
+    cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;}
+  .nav button .ic{font-size:20px;}
+  .nav button.on{color:var(--green);font-weight:600;}
+  /* review / SRS */
+  .revcard{background:var(--green-l);border-radius:16px;padding:22px 18px;text-align:center;margin:6px 0 14px;}
+  .revcard .fr{font-size:28px;font-weight:700;color:var(--green);letter-spacing:.5px;}
+  .revcard .ph{font-size:13px;color:var(--sub);margin-top:4px;}
+  .revcard .bk{font-size:17px;font-weight:600;margin-top:12px;line-height:1.5;}
+  .revcard .ex{font-size:13px;color:var(--sub);margin-top:8px;font-style:italic;line-height:1.5;}
+  .revcard .ok{color:var(--green);} .revcard .no{color:var(--red);}
+  .revopt{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+  .revopt button{text-align:left;border:1px solid var(--ring);background:#fff;border-radius:12px;
+    padding:11px 14px;font-size:14px;color:var(--ink);cursor:pointer;}
+  .revopt button.ri{background:#eaf4ee;border-color:var(--green);}
+  .revopt button.wr{background:#fbeae8;border-color:var(--red);}
+  .deck{background:var(--card);border-radius:14px;padding:13px 14px;margin-bottom:9px;box-shadow:var(--shadow);}
+  .deck .dh{display:flex;justify-content:space-between;align-items:center;}
+  .deck .dn{font-size:14px;font-weight:600;}
+  .deck .dm{font-size:11px;color:var(--sub);margin-top:3px;}
+  .deck .db{display:flex;gap:8px;margin-top:10px;}
+  .deck .db button{flex:1;border:1px solid var(--green);background:#fff;color:var(--green);
+    border-radius:10px;padding:8px 0;font-size:12px;cursor:pointer;}
+  .deck .db button.del{border-color:var(--red);color:var(--red);}
+  .deck .db button:disabled{opacity:.4;cursor:default;}
+  .wl-btn{border:1px solid var(--green);background:#fff;color:var(--green);
+    border-radius:10px;padding:3px 12px;font-size:12px;cursor:pointer;font-family:inherit;}
+  .wl-btn:disabled{opacity:.5;cursor:default;}
+  /* batch add */
+  .batch-ta{width:100%;border:1px solid var(--ring);background:#fbfdfb;border-radius:12px;
+    padding:10px 12px;font-size:14px;outline:none;color:var(--ink);resize:vertical;min-height:120px;
+    font-family:inherit;line-height:1.6;}
+  .batch-hint{font-size:11px;color:var(--sub);margin:8px 2px;line-height:1.6;}
+  .batch-row{display:flex;gap:8px;margin-top:10px;align-items:center;}
+  .batch-row .file{font-size:12px;color:var(--green);cursor:pointer;display:inline-flex;align-items:center;gap:4px;}
+  .batch-result{display:none;margin-top:10px;font-size:12px;line-height:1.8;
+    background:var(--green-l);border:1px solid #cfe6d8;border-radius:10px;padding:9px 12px;color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <h1>🌱 学苗 <span class="tag">专注苗圃</span></h1>
+    <p>向 Forest 学专注种树，向 Duolingo 学每日目标与连击，轻量、不惩罚、可接入量力。</p>
+  </div>
+
+  <!-- 学习 -->
+  <section class="screen on" id="sc-today">
+    <div class="card">
+      <h2>今天想种哪一科</h2>
+      <div class="chips" id="subChips"></div>
+      <div class="add-sub">
+        <input id="newSub" placeholder="加一科，如 英语 / 高数 / 考研政治" maxlength="12">
+        <button class="big-btn ghost" style="width:auto;padding:9px 16px;margin:0;" onclick="addSubject()">+ 加</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="timer-wrap">
+        <div class="ring" id="ring">
+          <svg width="180" height="180">
+            <circle cx="90" cy="90" r="80" stroke="var(--ring)" stroke-width="12" fill="none"/>
+            <circle id="ringFg" cx="90" cy="90" r="80" stroke="var(--green)" stroke-width="12"
+              fill="none" stroke-linecap="round" stroke-dasharray="502.6" stroke-dashoffset="502.6"/>
+          </svg>
+          <div class="mid">
+            <div class="tree" id="treeEmoji">🌱</div>
+            <div class="time" id="timeTxt">00:00</div>
+            <div class="sub" id="timerSub">还没开始</div>
+          </div>
+        </div>
+        <button class="big-btn" id="startBtn" onclick="toggleSession()">开始专注</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="gostats">
+        <div class="gostat"><div class="n" id="goalN">0%</div><div class="l">今日目标达成</div></div>
+        <div class="gostat"><div class="n" id="streakN">0🔥</div><div class="l">连续学习天数</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--sub);margin:10px 2px 0;">
+        每日目标 <b id="goalMinTxt">30</b> 分钟 · 点下方可改
+      </div>
+      <div class="add-sub" style="margin-top:8px;">
+        <input id="goalInput" type="number" min="5" max="600" placeholder="每日目标分钟" style="flex:1;">
+        <button class="big-btn ghost" style="width:auto;padding:9px 16px;margin:0;" onclick="setGoal()">设目标</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>没空计时？一键打卡</h2>
+      <div class="qlog">
+        <div class="qrow">
+          <select id="qlSub"></select>
+          <input class="amt" id="qlAmt" type="number" min="1" value="20" placeholder="量">
+        </div>
+        <div class="seg" id="qlSeg">
+          <button data-t="minutes" class="on" onclick="qlPick(this,'minutes')">⏱ 分钟</button>
+          <button data-t="count" onclick="qlPick(this,'count')">✅ 次/题</button>
+          <button data-t="output" onclick="qlPick(this,'output')">📝 产出</button>
+        </div>
+        <input id="qlNote" placeholder="备注（可选）：如 背了30个词 / 写完一篇阅读" maxlength="40" style="border:1px solid var(--ring);background:#fbfdfb;border-radius:12px;padding:10px 12px;font-size:14px;outline:none;">
+        <button class="big-btn" onclick="quickLog()">记一笔</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 记录 -->
+  <section class="screen" id="sc-records">
+    <div class="sum3">
+      <div class="s"><div class="n" id="rToday">0</div><div class="l">今日分钟</div></div>
+      <div class="s"><div class="n" id="rStreak">0</div><div class="l">连续天数</div></div>
+      <div class="s"><div class="n" id="rWeek">0</div><div class="l">本周分钟</div></div>
+    </div>
+    <div id="recList"></div>
+  </section>
+
+  <!-- 接量力 -->
+  <section class="screen" id="sc-sync">
+    <div class="card">
+      <h2>导出 → 接入量力</h2>
+      <p style="font-size:12px;color:var(--sub);margin:0 0 12px;line-height:1.6;">
+        学苗只负责「真实发生了学习」这件事，量力负责把它变成成长点、内心花园和连击。
+        导出标准 JSON，再在量力里「导入学习记录」即可合并（不覆盖你原有数据）。
+      </p>
+      <button class="big-btn" onclick="exportJSON('download')">⬇ 下载 JSON 文件</button>
+      <button class="big-btn ghost" style="margin-top:10px;" onclick="exportJSON('copy')">📋 复制 JSON 文本</button>
+      <div class="code" id="jsonView" style="margin-top:12px;"></div>
+    </div>
+    <div class="card">
+      <h2>在量力里这样接</h2>
+      <ol class="steps">
+        <li>学苗点「复制 JSON 文本」或「下载 JSON 文件」。</li>
+        <li>打开量力 →「我的」→「数据备份」→ 点「导入学习记录」。</li>
+        <li>粘贴文本 / 选文件 → 学习事件会折算成 <b>成长点🌱</b>，并在看板生成「学习连续 / 本周时长」。</li>
+        <li>成长点可去「成长池」页的圣物商店换宽恕令牌等。</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 复习（SRS，复刻不背单词核心） -->
+  <section class="screen" id="sc-review">
+    <div class="card">
+      <h2>📚 复习 · 间隔重复</h2>
+      <p style="font-size:12px;color:var(--sub);margin:0 0 10px;line-height:1.6;">
+        复刻不背单词的核心：记忆曲线安排复习 + 看词回忆 + 多模式测试。英语、编程共用一套卡片引擎，复习自动计入量力。
+      </p>
+      <div class="seg" id="revMode">
+        <button data-m="recall" class="on" onclick="revModePick(this,'recall')">🧠 回想</button>
+        <button data-m="choice" onclick="revModePick(this,'choice')">🔘 选择</button>
+      </div>
+    </div>
+
+    <div class="card" id="revActive" style="display:none;">
+      <div id="revArea"></div>
+      <button class="big-btn ghost" id="revExit" onclick="exitReview()" style="margin-top:12px;">退出复习</button>
+    </div>
+
+    <div class="card" id="revDecks">
+      <h2>卡组</h2>
+      <div id="deckList"></div>
+      <div class="add-sub" style="margin-top:12px;">
+        <input id="newDeck" placeholder="新卡组名，如 英语·考研词 / 编程·算法" maxlength="20">
+        <button class="big-btn ghost" style="width:auto;padding:9px 16px;margin:0;" onclick="addDeck()">+ 建</button>
+      </div>
+    </div>
+
+    <div class="card" id="revBooks">
+      <h2>🗂 导入考试词表（一键导入）</h2>
+      <p class="batch-hint">背哪些词是你自己认领的事——学苗只做「词表引擎」。以下是<b>已实测</b>的开源词表，点 <b>⬇ 一键导入</b> 即自动联网拉取、解析并建好卡组（下面三本都带中文释义，<b>不用再联网补词义</b>，秒建）：</p>
+
+      <div style="font-size:13px;margin-top:6px;">
+        <div style="font-weight:600;line-height:2;">① <a href="https://github.com/KyleBing/english-vocabulary" target="_blank" rel="noopener">KyleBing/english-vocabulary</a> <span style="color:var(--sub);font-weight:400;">★1.9k · 持续维护（2026-08 仍在更新）</span></div>
+        <div style="line-height:2.2;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span>📄 <a href="https://raw.githubusercontent.com/KyleBing/english-vocabulary/master/3%20%E5%9B%9B%E7%BA%A7-%E4%B9%B1%E5%BA%8F.txt" target="_blank" rel="noopener">四级-乱序.txt</a></span>
+            <span style="color:var(--sub);font-size:12px;">≈7,500 词</span>
+            <button class="wl-btn" onclick="fetchWordList('英语·四级','https://raw.githubusercontent.com/KyleBing/english-vocabulary/master/3%20%E5%9B%9B%E7%BA%A7-%E4%B9%B1%E5%BA%8F.txt',this)">⬇ 一键导入</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span>📄 <a href="https://raw.githubusercontent.com/KyleBing/english-vocabulary/master/4%20%E5%85%AD%E7%BA%A7-%E4%B9%B1%E5%BA%8F.txt" target="_blank" rel="noopener">六级-乱序.txt</a></span>
+            <span style="color:var(--sub);font-size:12px;">≈5,650 词</span>
+            <button class="wl-btn" onclick="fetchWordList('英语·六级','https://raw.githubusercontent.com/KyleBing/english-vocabulary/master/4%20%E5%85%AD%E7%BA%A7-%E4%B9%B1%E5%BA%8F.txt',this)">⬇ 一键导入</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span>📄 <a href="https://raw.githubusercontent.com/KyleBing/english-vocabulary/master/6%20%E6%89%98%E7%A6%8F-%E4%B9%B1%E5%BA%8F.txt" target="_blank" rel="noopener">托福-乱序.txt</a></span>
+            <span style="color:var(--sub);font-size:12px;">≈13,500 词（会慢几秒）</span>
+            <button class="wl-btn" onclick="fetchWordList('英语·托福','https://raw.githubusercontent.com/KyleBing/english-vocabulary/master/6%20%E6%89%98%E7%A6%8F-%E4%B9%B1%E5%BA%8F.txt',this)">⬇ 一键导入</button>
+          </div>
+          <div style="color:var(--sub);font-size:12px;">同仓库还有 考研 / 高中 / 初中 / SAT（根目录，同样格式可一键）</div>
+        </div>
+      </div>
+
+      <div style="font-size:13px;line-height:1.9;margin-top:8px;">
+        <div style="font-weight:600;">② <a href="https://github.com/JavaProgrammerLB/cet-word-list" target="_blank" rel="noopener">JavaProgrammerLB/cet-word-list</a> <span style="color:var(--sub);font-weight:400;">按教育部《四六级考试大纲 2016 修订版》整理 · MIT</span></div>
+        <div>📄 <a href="https://raw.githubusercontent.com/JavaProgrammerLB/cet-word-list/master/word-list.txt" target="_blank" rel="noopener">word-list.txt</a>（<b>纯词</b>每行一个、无释义，四级+六级合一）——纯词走「联网补释义」很慢，不适合一键；用它的话走上方卡组「批量」粘贴/导入文件，一次 ≤500 词。</div>
+      </div>
+
+      <div style="font-size:13px;line-height:1.9;margin-top:8px;color:var(--sub);">
+        <b style="color:inherit;">③ 提醒</b>：雅思/托福<b>官方从不发布词表</b>，市面全为机构整理版（上面的托福即此类）；四级/六级才有官方大纲词表。雅思在 ① 仓库的 <a href="https://github.com/KyleBing/english-vocabulary/blob/master/full_line_tsv/full/%E4%B9%B1%E5%BA%8F/%E9%9B%85%E6%80%9D.txt" target="_blank" rel="noopener">full_line_tsv → 雅思.txt</a>（多列富格式，需先取词头，暂不支持一键）。一键拉不动（大陆网络/断网）时：点文件名手动打开 → 复制全文 → 卡组「批量」粘贴导入，或给直链加 <code>https://ghproxy.com/</code> 前缀。
+      </div>
+
+      <ol class="steps" style="margin-top:10px;">
+        <li><b>一键</b>：点上方 <b>⬇ 一键导入</b> → 自动拉取解析、新建卡组（四级约 3~8 秒，受网络影响）。</li>
+        <li><b>兜底</b>：一键失败就点文件名 → 浏览器打开 .txt → <b>全选复制</b> → 任意卡组「批量」粘贴 → 「批量加入卡组」；或「📂 导入文件」选本地 .txt。</li>
+        <li><b>开背</b>：导完自动进 SRS 记忆曲线，直接开背。重复点一键会去重追加，不会建重复卡组。</li>
+      </ol>
+    </div>
+
+    <div class="card" id="revAddCard" style="display:none;">
+      <h2>加卡片到 <span id="addDeckName"></span></h2>
+      <div class="qlog">
+        <input id="cardFront" placeholder="正面（如英文词 / 概念）" maxlength="60">
+        <input id="cardBack" placeholder="背面（如中文释义）" maxlength="80">
+        <input id="cardEx" placeholder="例句（可选）" maxlength="80">
+        <button class="big-btn" onclick="addCard()">加入卡组</button>
+      </div>
+    </div>
+
+    <div class="card" id="revBatch" style="display:none;">
+      <h2>批量加卡到 <span id="batchDeckName"></span></h2>
+      <textarea class="batch-ta" id="batchText" placeholder="每行一个英文单词即可，自动补释义：&#10;abandon&#10;absorb&#10;courage&#10;也接受完整卡：&#10;递归 | 函数调用自身 | 须有基线条件"></textarea>
+      <div class="batch-hint">两种都认：<b>① 每行一个英文单词</b> → 自动补中文释义（内置词库优先，没收录的会联网查有道词典，需网络）｜<b>② 正面 | 背面 | 例句</b>（例句可省）。空行跳过、重复词去重；联网也查不到的词留在框里，补成 <b>词 | 释义</b> 再导。</div>
+      <div class="batch-row">
+        <label class="file">📂 导入文件<input type="file" id="batchFile" accept=".txt,.csv,text/plain" style="display:none" onchange="importBatchFile(this)"></label>
+        <button class="big-btn ghost" style="flex:1;margin:0;" onclick="openAddCard(document.getElementById('revBatch').getAttribute('data-did'))">单张加卡</button>
+      </div>
+      <button class="big-btn" id="batchGo" style="margin-top:10px;" onclick="parseBatch()">批量加入卡组</button>
+      <div class="batch-result" id="batchResult"></div>
+    </div>
+  </section>
+
+  <div class="nav">
+    <button class="on" onclick="go('today',this)"><span class="ic">🌿</span>学习</button>
+    <button onclick="go('records',this)"><span class="ic">📒</span>记录</button>
+    <button onclick="go('review',this)"><span class="ic">📚</span>复习</button>
+    <button onclick="go('sync',this)"><span class="ic">🔗</span>接量力</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var KEY="studysprout_v1";
+  var state=load();
+  var timer=null, qlType="minutes";
+  var rev=null, revMode="recall";
+  var REV_INT=[0,1,2,4,7,15,30]; // 记忆曲线：level → 下次复习间隔(天)
+
+  function load(){
+    try{var s=JSON.parse(localStorage.getItem(KEY));
+      if(s&&typeof s==="object"){
+        if(!s.review||!s.review.decks)s.review={decks:seedDecks()}; // 存量数据迁移：补全复习模块
+        return s;
+      }
+    }catch(e){}
+    return {subjects:["英语","数学","编程","阅读"],events:[],dailyGoalMin:30,
+            session:null /*{subject,startTs}*/,
+            review:{decks:seedDecks()}};
+  }
+  function seedDecks(){
+    var enWords=[
+      ["abandon","/əˈbændən/","v. 抛弃","He abandoned the plan."],
+      ["ability","/əˈbɪləti/","n. 能力","She has the ability to learn fast."],
+      ["absorb","/əbˈzɔːrb/","v. 吸收","Plants absorb water from soil."],
+      ["abundant","/əˈbʌndənt/","adj. 丰富的","The region has abundant resources."],
+      ["academic","/ˌækəˈdemɪk/","adj. 学术的","Academic research takes years."],
+      ["accelerate","/əkˈseləreɪt/","v. 加速","The car accelerated quickly."],
+      ["accomplish","/əˈkʌmplɪʃ/","v. 完成","We accomplished our goal."],
+      ["accurate","/ˈækjərət/","adj. 准确的","Give me accurate data."],
+      ["achieve","/əˈtʃiːv/","v. 达成","Hard work helps achieve success."],
+      ["acquire","/əˈkwaɪər/","v. 获得","Children acquire language fast."],
+      ["adapt","/əˈdæpt/","v. 适应","We must adapt to change."],
+      ["adequate","/ˈædɪkwət/","adj. 足够的","Get adequate sleep nightly."],
+      ["adjust","/əˈdʒʌst/","v. 调整","Adjust the plan if needed."],
+      ["admire","/ədˈmaɪər/","v. 钦佩","I admire her courage."],
+      ["adopt","/əˈdɒpt/","v. 采用；收养","They adopted a new method."],
+      ["advance","/ədˈvɑːns/","v. 推进","Technology advances fast."],
+      ["adverse","/ˈædvɜːrs/","adj. 不利的","Smoking has adverse effects."],
+      ["advocate","/ˈædvəkeɪt/","v. 提倡","He advocates daily reading."],
+      ["affect","/əˈfekt/","v. 影响","Weather affects our mood."],
+      ["analyze","/ˈænəlaɪz/","v. 分析","Analyze the result carefully."]
+    ];
+    var enCards=enWords.map(function(w){return {id:uid(),front:w[0],phonetic:w[1],back:w[2],ex:w[3],level:0,due:0};});
+    var csCards=[
+      {id:uid(),front:"时间复杂度 O(1)",back:"常数时间，与输入规模无关",ex:"数组按索引访问是 O(1)",level:0,due:0},
+      {id:uid(),front:"栈 vs 队列",back:"栈 LIFO 后进先出；队列 FIFO 先进先出",ex:"函数调用用栈，排队用队列",level:0,due:0},
+      {id:uid(),front:"递归",back:"函数调用自身，须有基线条件避免无限递归",ex:"阶乘 fact(n)=n*fact(n-1)",level:0,due:0}
+    ];
+    return [
+      {id:"d_en",name:"英语·高频词",cards:enCards},
+      {id:"d_cs",name:"编程·算法概念",cards:csCards}
+    ];
+  }
+  // 纯词自动富化索引（学不背单词：用户只传单词，释义/例句由应用自动补）
+  // 结构：{ 词: {b:中文释义, e:例句} }；词库未收录的词在批量导入时留在输入框待补释义
+  var EN_BANK={
+    "abandon":{b:"v. 抛弃；放弃",e:"He abandoned the old plan."},
+    "ability":{b:"n. 能力",e:"She has the ability to learn fast."},
+    "absorb":{b:"v. 吸收",e:"Plants absorb water from soil."},
+    "abundant":{b:"adj. 丰富的；充裕的",e:"The region has abundant resources."},
+    "academic":{b:"adj. 学术的",e:"Academic research takes years."},
+    "accept":{b:"v. 接受",e:"She accepted the gift."},
+    "achieve":{b:"v. 达成；实现",e:"Hard work helps achieve success."},
+    "adapt":{b:"v. 适应",e:"We must adapt to change."},
+    "adjust":{b:"v. 调整",e:"Adjust the plan if needed."},
+    "admire":{b:"v. 钦佩",e:"I admire her courage."},
+    "adopt":{b:"v. 采用；收养",e:"They adopted a new method."},
+    "advance":{b:"v. 推进；前进",e:"Technology advances fast."},
+    "affect":{b:"v. 影响",e:"Weather affects our mood."},
+    "agree":{b:"v. 同意",e:"I agree with your idea."},
+    "analyze":{b:"v. 分析",e:"Analyze the result carefully."},
+    "balance":{b:"n. 平衡；余额",e:"Keep a balance between work and rest."},
+    "benefit":{b:"n. 益处；v. 受益",e:"Exercise benefits your health."},
+    "brave":{b:"adj. 勇敢的",e:"Be brave and try again."},
+    "brief":{b:"adj. 简短的",e:"Keep your talk brief."},
+    "calm":{b:"adj. 平静的",e:"Stay calm in a storm."},
+    "certain":{b:"adj. 确定的",e:"I am certain of the answer."},
+    "change":{b:"v./n. 改变",e:"Change happens every day."},
+    "choice":{b:"n. 选择",e:"Make a wise choice."},
+    "common":{b:"adj. 常见的",e:"That is a common mistake."},
+    "courage":{b:"n. 勇气",e:"It takes courage to speak up."},
+    "create":{b:"v. 创造",e:"Good tools create good work."},
+    "decide":{b:"v. 决定",e:"Decide what to do first."},
+    "demand":{b:"n./v. 需求；要求",e:"The job demands patience."},
+    "design":{b:"v./n. 设计",e:"She designed the poster."},
+    "develop":{b:"v. 发展；开发",e:"Practice develops your skill."},
+    "difference":{b:"n. 差异",e:"Age makes a difference."},
+    "effort":{b:"n. 努力",e:"Make an effort every day."},
+    "embrace":{b:"v. 拥抱；欣然接受",e:"Embrace the new challenge."},
+    "explain":{b:"v. 解释",e:"Explain the rule simply."},
+    "focus":{b:"v./n. 专注；焦点",e:"Focus on one task at a time."},
+    "gentle":{b:"adj. 温和的",e:"She spoke in a gentle voice."},
+    "habit":{b:"n. 习惯",e:"Good habits grow over time."},
+    "ignore":{b:"v. 忽视",e:"Do not ignore small signs."},
+    "journey":{b:"n. 旅程",e:"Enjoy the journey, not just the end."},
+    "knowledge":{b:"n. 知识",e:"Knowledge is built little by little."},
+    "limit":{b:"n./v. 限制",e:"There is no limit to learning."},
+    "measure":{b:"v. 测量；n. 措施",e:"Measure twice before you cut."},
+    "mention":{b:"v. 提到",e:"He mentioned your name."},
+    "moment":{b:"n. 时刻；片刻",e:"Wait a moment, please."},
+    "notice":{b:"v. 注意到",e:"I noticed the small change."},
+    "observe":{b:"v. 观察",e:"Observe before you act."},
+    "opportunity":{b:"n. 机会",e:"Seize every opportunity."},
+    "practice":{b:"v./n. 练习",e:"Practice makes progress."},
+    "purpose":{b:"n. 目的",e:"The purpose of study is growth."},
+    "reduce":{b:"v. 减少",e:"Reduce the cost step by step."},
+    "reflect":{b:"v. 反思；反射",e:"Take time to reflect on the day."},
+    "remain":{b:"v. 保持；留下",e:"Remain calm under pressure."},
+    "respect":{b:"v./n. 尊重",e:"Respect different opinions."},
+    "satisfy":{b:"v. 使满意",e:"Your effort satisfies the teacher."},
+    "silent":{b:"adj. 沉默的",e:"Keep silent during the test."},
+    "solution":{b:"n. 解决办法",e:"Every problem has a solution."},
+    "strength":{b:"n. 力量；强项",e:"Know your strength and use it."},
+    "suggest":{b:"v. 建议",e:"I suggest taking a short break."},
+    "support":{b:"v./n. 支持",e:"Friends support each other."},
+    "trust":{b:"v./n. 信任",e:"Trust the process."},
+    "value":{b:"n. 价值；v. 珍视",e:"Value your time."},
+    "wander":{b:"v. 漫步；走神",e:"Do not wander from the topic."},
+    "wisdom":{b:"n. 智慧",e:"Experience brings wisdom."}
+  };
+  function save(){localStorage.setItem(KEY,JSON.stringify(state));}
+  function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+  function todayKey(d){d=d||new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();}
+  function dayDiff(a,b){ // a,b: Date at local midnight
+    return Math.round((a-b)/86400000);
+  }
+  function toast(m){var t=document.getElementById("toast");t.textContent=m;t.classList.add("show");
+    clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove("show");},1600);}
+
+  // ---------- 科目 ----------
+  function renderChips(){
+    var box=document.getElementById("subChips");box.innerHTML="";
+    state.subjects.forEach(function(s){
+      var c=document.createElement("div");c.className="chip"+(state.session&&state.session.subject===s?" on":"");
+      c.textContent=s;
+      c.onclick=function(){ if(state.session)return; // 计时中不换科
+        document.querySelectorAll("#subChips .chip").forEach(function(x){x.classList.remove("on");});
+        c.classList.add("on"); if(state.session)state.session.subject=s; save(); };
+      var x=document.createElement("span");x.className="x";x.textContent="×";
+      x.onclick=function(e){e.stopPropagation();removeSubject(s);};
+      c.appendChild(x);box.appendChild(c);
+    });
+    // 同步一键打卡下拉
+    var sel=document.getElementById("qlSub");var cur=sel.value;
+    sel.innerHTML="";state.subjects.forEach(function(s){var o=document.createElement("option");o.value=s;o.textContent=s;sel.appendChild(o);});
+    if(cur&&state.subjects.indexOf(cur)>=0)sel.value=cur;
+  }
+  function addSubject(){
+    var i=document.getElementById("newSub");var v=i.value.trim();
+    if(!v)return; if(state.subjects.indexOf(v)>=0){toast("这科已经有了");return;}
+    state.subjects.push(v);i.value="";save();renderChips();toast("已加 "+v);
+  }
+  function removeSubject(s){
+    if(state.session&&state.session.subject===s){toast("正在计时这科，先结束");return;}
+    if(!confirm("删除科目「"+s+"」？已记录的事件保留。"))return;
+    state.subjects=state.subjects.filter(function(x){return x!==s;});save();renderChips();
+  }
+  window.addSubject=addSubject;
+
+  // ---------- 计时（Forest 式种树，不惩罚） ----------
+  function treeByMin(m){
+    if(m<1)return "🌱"; if(m<10)return "🌿"; if(m<25)return "🪴"; if(m<45)return "🌳"; return "🌲";
+  }
+  function elapsedMin(){return state.session?Math.max(0,(Date.now()-state.session.startTs)/60000):0;}
+  function toggleSession(){
+    if(state.session){ stopSession(); return; }
+    var sel=document.querySelector("#subChips .chip.on");
+    var sub=sel?sel.textContent.replace("×","").trim():(state.subjects[0]||"学习");
+    state.session={subject:sub,startTs:Date.now()};save();renderChips();
+    document.getElementById("startBtn").textContent="结束并种下";
+    tickTimer(); timer=setInterval(tickTimer,1000);
+    toast("开始专注 · "+sub);
+  }
+  window.toggleSession=toggleSession;
+  function tickTimer(){
+    var m=elapsedMin();
+    var sec=Math.floor((Date.now()-(state.session?state.session.startTs:Date.now()))/1000);
+    var mm=Math.floor(sec/60),ss=sec%60;
+    document.getElementById("timeTxt").textContent=(mm<10?"0":"")+mm+":"+(ss<10?"0":"")+ss;
+    document.getElementById("treeEmoji").textContent=treeByMin(m);
+    // 进度环按今日目标走（先显示本次占目标比例，封顶）
+    var pct=Math.min(1,m/(state.dailyGoalMin||30));
+    var C=502.6; document.getElementById("ringFg").style.strokeDashoffset=C*(1-pct);
+    document.getElementById("timerSub").textContent= state.session?("正在种 "+state.session.subject):"还没开始";
+    if(!state.session&&timer){clearInterval(timer);timer=null;}
+  }
+  function stopSession(){
+    if(!state.session)return;
+    var m=Math.max(1,Math.round(elapsedMin()));
+    pushEvent(state.session.subject,"minutes",m,"专注计时");
+    var subj=state.session.subject;state.session=null;
+    if(timer){clearInterval(timer);timer=null;}
+    document.getElementById("startBtn").textContent="开始专注";
+    document.getElementById("ringFg").style.strokeDashoffset=502.6;
+    document.getElementById("treeEmoji").textContent="🌱";
+    document.getElementById("timeTxt").textContent="00:00";
+    document.getElementById("timerSub").textContent="还没开始";
+    save();renderChips();renderToday();toast("种下一棵 "+subj+" 的树 🌳 +"+m+"分钟");
+  }
+
+  // ---------- 一键打卡 ----------
+  function qlPick(b,t){qlType=t;document.querySelectorAll("#qlSeg button").forEach(function(x){x.classList.remove("on");});b.classList.add("on");}
+  window.qlPick=qlPick;
+  function quickLog(){
+    var sub=document.getElementById("qlSub").value;
+    var amt=parseInt(document.getElementById("qlAmt").value,10);if(isNaN(amt)||amt<1)amt=1;
+    var note=document.getElementById("qlNote").value.trim();
+    pushEvent(sub,qlType,amt,note);
+    document.getElementById("qlNote").value="";
+    toast("记下了 · "+sub);
+  }
+  window.quickLog=quickLog;
+
+  function pushEvent(subject,type,amount,note){
+    state.events.push({id:uid(),ts:Date.now(),subject:subject,type:type,
+      amount:amount,note:note||"",source:"studyapp"});
+    save();renderToday();renderRecords();
+  }
+
+  function setGoal(){
+    var v=parseInt(document.getElementById("goalInput").value,10);
+    if(isNaN(v)||v<5){toast("目标至少 5 分钟");return;}
+    state.dailyGoalMin=v;save();renderToday();toast("每日目标 "+v+" 分钟");
+  }
+  window.setGoal=setGoal;
+
+  // ---------- 统计 ----------
+  function minutesToday(){
+    var k=todayKey();
+    return state.events.filter(function(e){return e.type==="minutes"&&todayKey(new Date(e.ts))===k;})
+      .reduce(function(a,e){return a+e.amount;},0);
+  }
+  function minutesWeek(){
+    var now=new Date();var dow=(now.getDay()+6)%7; // 周一为一周起点
+    var mon=new Date(now);mon.setDate(now.getDate()-dow);mon.setHours(0,0,0,0);
+    return state.events.filter(function(e){return e.type==="minutes"&&new Date(e.ts)>=mon;})
+      .reduce(function(a,e){return a+e.amount;},0);
+  }
+  function streak(){
+    if(!state.events.length)return 0;
+    var days={};state.events.forEach(function(e){days[todayKey(new Date(e.ts))]=1;});
+    var set=Object.keys(days).sort();
+    var last=new Date(set[set.length-1]);last.setHours(0,0,0,0);
+    var today=new Date();today.setHours(0,0,0,0);
+    if(dayDiff(today,last)>1)return 0; // 断超过1天算断
+    var n=0;var cur=last;
+    while(days[todayKey(cur)]){n++;cur.setDate(cur.getDate()-1);}
+    return n;
+  }
+
+  // ---------- 渲染 ----------
+  function renderToday(){
+    renderChips();
+    document.getElementById("goalMinTxt").textContent=state.dailyGoalMin;
+    var mt=minutesToday(),g=state.dailyGoalMin||30;
+    var pct=Math.min(100,Math.round(mt/g*100));
+    document.getElementById("goalN").textContent=pct+"%";
+    document.getElementById("streakN").textContent=streak()+"🔥";
+    if(state.session)tickTimer();
+  }
+  function renderRecords(){
+    document.getElementById("rToday").textContent=minutesToday();
+    document.getElementById("rStreak").textContent=streak();
+    document.getElementById("rWeek").textContent=minutesWeek();
+    var box=document.getElementById("recList");
+    if(!state.events.length){box.innerHTML='<div class="empty">还没有记录，去学习页种第一棵树吧 🌱</div>';return;}
+    var sorted=state.events.slice().sort(function(a,b){return b.ts-a.ts;});
+    var groups={};
+    sorted.forEach(function(e){var k=todayKey(new Date(e.ts));(groups[k]=groups[k]||[]).push(e);});
+    var keys=Object.keys(groups).sort().reverse();
+    var ico={minutes:"⏱",count:"✅",output:"📝"};
+    var html="";
+    keys.forEach(function(k){
+      var arr=groups[k];var sum=arr.filter(function(e){return e.type==="minutes";})
+        .reduce(function(a,e){return a+e.amount;},0);
+      html+='<div class="daygrp"><div class="dh"><span>'+k+'</span><span>'+sum+' 分钟</span></div>';
+      arr.forEach(function(e){
+        html+='<div class="ev"><div class="ic">'+ico[e.type]+'</div>'+
+          '<div class="meta"><div class="t">'+esc(e.subject)+'</div>'+
+          '<div class="d">'+(e.note?esc(e.note):typeName(e.type))+'</div></div>'+
+          '<div class="amt">'+amtTxt(e)+'</div></div>';
+      });
+      html+='</div>';
+    });
+    box.innerHTML=html;
+  }
+  function typeName(t){return t==="minutes"?"专注":t==="count"?"打卡":"产出";}
+  function amtTxt(e){return e.type==="minutes"?e.amount+"分":(e.type==="count"?e.amount+"次":e.amount+"项");}
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+
+  // ---------- 导出 ----------
+  function buildExport(){
+    return state.events.map(function(e){
+      return {id:e.id,ts:e.ts,subject:e.subject,type:e.type,amount:e.amount,note:e.note,source:"studyapp"};
+    });
+  }
+  function exportJSON(mode){
+    var data=buildExport();var txt=JSON.stringify(data,null,2);
+    document.getElementById("jsonView").textContent=txt;
+    if(mode==="download"){
+      var blob=new Blob([txt],{type:"application/json"});
+      var url=URL.createObjectURL(blob);var a=document.createElement("a");
+      a.href=url;a.download="studysprout-"+todayKey()+".json";
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      setTimeout(function(){URL.revokeObjectURL(url);},1000);toast("已下载 JSON ✅");
+    }else{
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(function(){toast("已复制 ✅");},
+          function(){fallbackCopy(txt);});
+      }else fallbackCopy(txt);
+    }
+  }
+  window.exportJSON=exportJSON;
+  function fallbackCopy(txt){
+    var ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);
+    ta.select();try{document.execCommand("copy");toast("已复制 ✅");}catch(e){toast("复制失败，请手动选文本");}
+    document.body.removeChild(ta);
+  }
+
+  // ---------- 导航 ----------
+  window.go=function(name,btn){
+    document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("on");});
+    document.getElementById("sc-"+name).classList.add("on");
+    document.querySelectorAll(".nav button").forEach(function(b){b.classList.remove("on");});
+    if(btn)btn.classList.add("on");
+    if(name==="today")renderToday(); if(name==="records")renderRecords();
+    if(name==="review")renderReview();
+    if(name==="sync"){var v=document.getElementById("jsonView");if(!v.textContent)exportJSON("view");}
+  };
+
+  // ---------- 复习（SRS，复刻不背单词核心） ----------
+  function findDeck(did){return state.review.decks.filter(function(d){return d.id===did;})[0];}
+  function findCard(ref){var d=findDeck(ref.did);return d?d.cards.filter(function(c){return c.id===ref.cid;})[0]:null;}
+  function gatherDue(did){
+    var q=[];
+    state.review.decks.forEach(function(d){
+      if(did&&d.id!==did)return;
+      d.cards.forEach(function(c){ if((c.due||0)<=Date.now()) q.push({did:d.id,cid:c.id}); });
+    });
+    q.sort(function(a,b){return (findCard(a).due||0)-(findCard(b).due||0);});
+    return q;
+  }
+  function scheduleCard(c,remembered){
+    if(remembered){ c.level=Math.min(REV_INT.length-1,c.level+1); }
+    else { c.level=0; }
+    var days=REV_INT[c.level]||30;
+    c.due=Date.now()+days*86400000;
+  }
+  function buildChoices(card){
+    var all=[];
+    state.review.decks.forEach(function(d){d.cards.forEach(function(c){if(c.back!==card.back)all.push(c.back);});});
+    var pool=all.slice(),pick=[];
+    for(var i=0;i<3&&pool.length;i++){var j=Math.floor(Math.random()*pool.length);pick.push(pool.splice(j,1)[0]);}
+    var opts=pick.map(function(t){return {text:t,correct:false};});
+    opts.push({text:card.back,correct:true});
+    for(var k=opts.length-1;k>0;k--){var m=Math.floor(Math.random()*(k+1));var tmp=opts[k];opts[k]=opts[m];opts[m]=tmp;}
+    return opts;
+  }
+  function startDeckReview(did){
+    var q=gatherDue(did);
+    if(!q.length){toast("这个卡组暂时没有待复习的卡");return;}
+    rev={queue:q,idx:0,rated:0,mode:revMode};
+    document.getElementById("revDecks").style.display="none";
+    document.getElementById("revAddCard").style.display="none";
+    document.getElementById("revBooks").style.display="none";
+    document.getElementById("revActive").style.display="block";
+    renderRevCard();
+  }
+  window.startDeckReview=startDeckReview;
+  function renderRevCard(){
+    if(!rev||rev.idx>=rev.queue.length){finishReview();return;}
+    var ref=rev.queue[rev.idx];var deck=findDeck(ref.did),card=findCard(ref);
+    var area=document.getElementById("revArea");
+    var html='<div style="font-size:12px;color:var(--sub);margin-bottom:8px;">复习进度 '+(rev.idx+1)+' / '+rev.queue.length+' · 已判 '+rev.rated+'</div>';
+    if(rev.mode==="recall"){
+      html+='<div class="revcard"><div class="fr">'+esc(card.front)+'</div>'+(card.phonetic?'<div class="ph">'+esc(card.phonetic)+'</div>':'')+'</div>';
+      html+='<button class="big-btn ghost" id="revReveal">显示释义</button>';
+      html+='<div id="revRate" style="display:none;margin-top:10px;">'+
+            '<button class="big-btn" id="revYes">✅ 记住了</button>'+
+            '<button class="big-btn ghost" style="margin-top:10px;" id="revNo">🌱 还没记住</button></div>';
+      area.innerHTML=html;
+      document.getElementById("revReveal").onclick=function(){
+        var rc=document.querySelector("#revArea .revcard");
+        rc.innerHTML+='<div class="bk">'+esc(card.back)+'</div>'+(card.ex?'<div class="ex">'+esc(card.ex)+'</div>':'');
+        document.getElementById("revReveal").style.display="none";
+        document.getElementById("revRate").style.display="block";
+      };
+      document.getElementById("revYes").onclick=function(){revRate(true);};
+      document.getElementById("revNo").onclick=function(){revRate(false);};
+    }else{
+      var opts=buildChoices(card);
+      html+='<div class="revcard"><div class="fr">'+esc(card.front)+'</div>'+(card.phonetic?'<div class="ph">'+esc(card.phonetic)+'</div>':'')+'</div>';
+      html+='<div class="revopt" id="revOpt">';
+      opts.forEach(function(o){html+='<button data-correct="'+(o.correct?"1":"0")+'">'+esc(o.text)+'</button>';});
+      html+='</div>';
+      area.innerHTML=html;
+      var ob=document.getElementById("revOpt");
+      Array.prototype.forEach.call(ob.children,function(btn){
+        btn.onclick=function(){
+          var correct=btn.getAttribute("data-correct")==="1";
+          Array.prototype.forEach.call(ob.children,function(b){b.onclick=null;});
+          btn.classList.add(correct?"ri":"wr");
+          if(!correct){Array.prototype.forEach.call(ob.children,function(b){if(b.getAttribute("data-correct")==="1")b.classList.add("ri");});}
+          setTimeout(function(){revRate(correct);},560);
+        };
+      });
+    }
+  }
+  function revRate(remembered){
+    if(!rev)return;
+    var ref=rev.queue[rev.idx];var card=findCard(ref);
+    scheduleCard(card,remembered);
+    rev.rated++;
+    if(!remembered){rev.queue.push(ref);} // 没记住，本轮稍后再来
+    rev.idx++;
+    save();renderRevCard();
+  }
+  function finishReview(){
+    var n=rev?rev.rated:0;    rev=null;
+    document.getElementById("revActive").style.display="none";
+    document.getElementById("revDecks").style.display="block";
+    document.getElementById("revBooks").style.display="block";
+    renderReview();
+    if(n>0)pushEvent("复习","count",n,"间隔复习 "+n+" 张 · "+(revMode==="choice"?"选择题":"回想"));
+    toast("复习完成 🌿 共 "+n+" 张，已计入量力");
+  }
+  function exitReview(){
+    rev=null;
+    document.getElementById("revActive").style.display="none";
+    document.getElementById("revDecks").style.display="block";
+    document.getElementById("revBooks").style.display="block";
+    renderReview();
+  }
+  window.exitReview=exitReview;
+  function revModePick(b,m){revMode=m;document.querySelectorAll("#revMode button").forEach(function(x){x.classList.remove("on");});b.classList.add("on");}
+  window.revModePick=revModePick;
+  function renderReview(){
+    if(!state.review||!state.review.decks)state.review={decks:seedDecks()}; // 双保险，避免旧数据缺字段
+    var box=document.getElementById("deckList");if(!box)return;
+    if(!state.review.decks.length){box.innerHTML='<div class="empty">还没有卡组，下面建一个吧</div>';return;}
+    var html="";
+    state.review.decks.forEach(function(d){
+      var due=d.cards.filter(function(c){return (c.due||0)<=Date.now();}).length;
+      var mastered=d.cards.filter(function(c){return c.level>=5;}).length;
+      html+='<div class="deck"><div class="dh"><span class="dn">'+esc(d.name)+'</span>'+
+        '<span style="font-size:11px;color:var(--sub);">'+d.cards.length+' 张</span></div>'+
+        '<div class="dm">待复习 '+due+' · 已掌握 '+mastered+' · 总 '+d.cards.length+'</div>'+
+        '<div class="db"><button onclick="startDeckReview(\''+d.id+'\')">复习 ('+due+')</button>'+
+        '<button onclick="openAddCard(\''+d.id+'\')">+卡</button>'+
+        '<button onclick="openBatch(\''+d.id+'\')">批量</button>'+
+        '<button class="del" onclick="delDeck(\''+d.id+'\')">删</button></div></div>';
+    });
+    box.innerHTML=html;
+  }
+  window.openAddCard=openAddCard;
+  window.delDeck=delDeck;
+  window.addDeck=addDeck;
+  window.addCard=addCard;
+  function addDeck(){
+    var i=document.getElementById("newDeck");var v=i.value.trim();
+    if(!v)return;
+    state.review.decks.push({id:uid(),name:v,cards:[]});
+    i.value="";save();renderReview();toast("已建卡组 "+v);
+  }
+  function openAddCard(did){
+    document.getElementById("revBatch").style.display="none";
+    document.getElementById("revAddCard").style.display="block";
+    document.getElementById("addDeckName").textContent=findDeck(did).name;
+    document.getElementById("revAddCard").setAttribute("data-did",did);
+    document.getElementById("cardFront").value="";
+    document.getElementById("cardBack").value="";
+    document.getElementById("cardEx").value="";
+    document.getElementById("cardFront").focus();
+  }
+  function openBatch(did){
+    document.getElementById("revAddCard").style.display="none";
+    document.getElementById("revBatch").style.display="block";
+    document.getElementById("batchDeckName").textContent=findDeck(did).name;
+    document.getElementById("revBatch").setAttribute("data-did",did);
+    document.getElementById("batchText").value="";
+    document.getElementById("batchText").focus();
+  }
+  window.openBatch=openBatch;
+  // ---------- 联网补释义（有道词典 suggest，免费免 key，JSONP 绕过 CORS） ----------
+  // 学不背单词：用户只传词，释义自动补。词库没收录 → 联网查有道 → 还不行才留框待补
+  var DICT_Q="https://dict.youdao.com/suggest?le=en&doctype=json&cache=false&num=1&q=";
+  var _dcb=0;
+  function lookupWord(word){
+    return new Promise(function(resolve){
+      var cb="dictcb"+(_dcb++)+"_"+Date.now().toString(36);
+      var s=null,done=false;
+      function fin(v){
+        if(done)return;done=true;
+        try{delete window[cb];}catch(e){}
+        if(s){try{document.head.removeChild(s);}catch(e){}}
+        clearTimeout(tm);resolve(v);
+      }
+      var tm=setTimeout(function(){fin(null);},6000); // 6s 超时：网络不可用/被墙 → 视为没查到
+      window[cb]=function(j){
+        try{
+          var en=j&&j.data&&j.data.entries;
+          var ex=en&&en[0]&&en[0].explain?String(en[0].explain).trim():"";
+          fin(ex?{back:ex}:null);
+        }catch(e){fin(null);}
+      };
+      s=document.createElement("script");
+      s.src=DICT_Q+encodeURIComponent(word)+"&callback="+cb;
+      s.onerror=function(){fin(null);};
+      document.head.appendChild(s);
+    });
+  }
+  async function parseBatch(){
+    var wrap=document.getElementById("revBatch");
+    var did=wrap.getAttribute("data-did");
+    var deck=findDeck(did);
+    if(!deck){toast("卡组不存在");return;}
+    var raw=document.getElementById("batchText").value;
+    if(!raw.trim()){toast("先粘贴或导入词表");return;}
+    var btn=document.getElementById("batchGo");
+    var lines=raw.split(/\r?\n/);
+    var result=document.getElementById("batchResult");
+    var added=0,dup=0,pend=[],bad=[],keep=[],lookup=[],src={bank:0,net:0},netFail=0;
+    function exists(f){return deck.cards.some(function(c){return c.front===f;});}
+    function pushCard(front,phon,back,ex){
+      deck.cards.push({id:uid(),front:front,phonetic:phon||"",back:back,ex:ex||"",level:0,due:0});
+      added++;
+    }
+    // 第一遍：同步分类（完整卡直接入 · 纯词先查内置词库 · 其余留框）
+    lines.forEach(function(ln){
+      var s=ln.trim();
+      if(!s)return;                                    // 空行：自动跳过
+      var p=s.split(/\||\t/).map(function(x){return x.trim();});
+      if(p.length>=2&&p[0]&&p[1]){                     // ① 完整卡：正面 | 背面 | 例句
+        if(exists(p[0])){dup++;return;}
+        pushCard(p[0],"",p[1],p[2]||"");return;
+      }
+      if(/^[A-Za-z][A-Za-z' -]*$/.test(s)){            // ② 纯英文单词
+        var hit=EN_BANK[s.toLowerCase()];
+        if(hit){                                       // 内置词库命中（中文释义，零网络）
+          if(exists(s)){dup++;return;}
+          pushCard(s,"",hit.b,hit.e||"");src.bank++;return;
+        }
+        lookup.push(s);return;                         // 词库没收录 → 第二轮联网
+      }
+      bad.push(s);keep.push(s);                        // 既非单词也非 词|释义 → 留框修正
+    });
+    // 第二遍：联网补释义（逐词 JSONP，带超时）
+    if(lookup.length){
+      btn.disabled=true;btn.textContent="正在联网补释义…";
+      for(var i=0;i<lookup.length;i++){
+        result.innerHTML="🔎 正在联网补释义… "+(i+1)+"/"+lookup.length+"（"+esc(lookup[i])+"）";
+        result.style.display="block";
+        var r=await lookupWord(lookup[i]);
+        if(r){
+          if(exists(lookup[i]))dup++;
+          else{pushCard(lookup[i],"",r.back,"");src.net++;}
+        }else{pend.push(lookup[i]);keep.push(lookup[i]);netFail++;}
+      }
+      btn.disabled=false;btn.textContent="批量加入卡组";
+    }
+    if(added||dup){save();renderReview();}
+    document.getElementById("batchText").value=keep.join("\n");
+    var msg="";
+    if(added)msg+="✅ 已加入 <b>"+added+"</b> 张（🏠 内置词库 "+src.bank+" · 🌐 联网词典 "+src.net+"）";
+    if(dup)msg+=(msg?"<br>":"")+"🔁 重复跳过 "+dup;
+    if(pend.length){
+      msg+="<br>🆕 <b>"+pend.length+"</b> 个词还没补到释义"
+        +(netFail?"（联网词典不可达，需网络；或词条未收录）":"（词典里也没收录）")+"：";
+      var pl=pend.slice(0,8);
+      msg+=pl.join("、")+(pend.length>8?" 等":"");
+      msg+="<br>把想要的重点词补成 <b>词 | 释义</b> 再导一次即可";
+    }
+    if(bad.length){
+      var bl=bad.slice(0,4);
+      msg+="<br>⚠️ <b>"+bad.length+"</b> 行格式无法识别，留在输入框："+bl.join("、")+(bad.length>4?" 等":"");
+    }
+    result.innerHTML=msg;
+    result.style.display=msg?"block":"none";
+    if(added)toast("已加入 "+added+" 张"+(netFail?"（"+netFail+" 个没查到，留在框里）":""));
+    else if(dup&&!added&&!pend.length&&!bad.length)toast("都是卡组里已有的词，没加新的");
+  }
+  window.parseBatch=parseBatch;
+  // ---------- 一键导入开源词表（点按钮 fetch 直链 → 自动建卡组） ----------
+  function fetchWordList(name,url,btn){
+    if(btn.disabled)return;
+    btn.disabled=true;btn.textContent="拉取中…";
+    var ctl=(typeof AbortController!=="undefined")?new AbortController():null;
+    var timer=setTimeout(function(){if(ctl)ctl.abort();},30000);
+    fetch(url,{signal:ctl?ctl.signal:undefined})
+      .then(function(r){clearTimeout(timer);if(!r.ok)throw new Error("HTTP "+r.status);return r.text();})
+      .then(function(txt){
+        var msg=importWordListTxt(name,txt);
+        btn.disabled=false;btn.textContent="⬇ 一键导入";
+        renderReview();toast(msg);
+      })
+      .catch(function(e){
+        clearTimeout(timer);
+        btn.disabled=false;btn.textContent="⬇ 一键导入";
+        toast("拉取失败："+((e&&e.message)||"网络不通")+"\n（需能访问 raw.githubusercontent.com；不行就走批量粘贴/导入文件）");
+      });
+  }
+  function importWordListTxt(name,txt){
+    var deck=null,i;
+    for(i=0;i<state.review.decks.length;i++)if(state.review.decks[i].name===name){deck=state.review.decks[i];break;}
+    var created=!deck;
+    if(!deck){deck={id:uid(),name:name,cards:[]};state.review.decks.push(deck);}
+    var have={};for(i=0;i<deck.cards.length;i++)have[deck.cards[i].front]=1;
+    var lines=txt.split(/\r?\n/),added=0,dup=0,bad=0;
+    for(i=0;i<lines.length;i++){
+      var s=lines[i].trim();if(!s)continue;
+      var p=s.split(/[|\t]/).map(function(x){return x.trim();});
+      if(p.length>=2&&p[0]&&p[1]){                       // 词<TAB>释义 / 词|释义
+        if(have[p[0]]){dup++;continue;}
+        have[p[0]]=1;
+        deck.cards.push({id:uid(),front:p[0],phonetic:"",back:p.slice(1).join(" ").trim(),ex:"",level:0,due:0});
+        added++;continue;
+      }
+      if(/^[A-Za-z][A-Za-z' -]*$/.test(s)&&EN_BANK[s.toLowerCase()]){  // 纯词但内置词库命中
+        var h=EN_BANK[s.toLowerCase()];
+        if(have[s]){dup++;continue;}
+        have[s]=1;
+        deck.cards.push({id:uid(),front:s,phonetic:"",back:h.b,ex:h.e||"",level:0,due:0});
+        added++;continue;
+      }
+      bad++;
+    }
+    try{save();}catch(err){
+      if(created)state.review.decks=state.review.decks.filter(function(d){return d!==deck;});
+      return "保存失败：本地空间可能不够（"+deck.cards.length+" 词），建议只导一本或清掉旧卡组";
+    }
+    var msg=(created?"已建卡组「"+name+"」":"已追加到「"+name+"」")+(added?added+" 词":"")+(dup?" · 重复跳过 "+dup:"")+(bad?" · 无法识别 "+bad+" 行":"");
+    if(!added&&created)msg="这本词表没解析出词（格式不是 词<TAB>释义？），可走批量粘贴手导";
+    return msg;
+  }
+  window.fetchWordList=fetchWordList;
+  function importBatchFile(input){
+    var f=input.files&&input.files[0];if(!f)return;
+    var r=new FileReader();
+    r.onload=function(){document.getElementById("batchText").value=r.result;toast("已读入文件，检查后点批量加入");};
+    r.readAsText(f);input.value="";
+  }
+  window.importBatchFile=importBatchFile;
+  function addCard(){
+    var wrap=document.getElementById("revAddCard");
+    var did=wrap.getAttribute("data-did");
+    var f=document.getElementById("cardFront").value.trim();
+    var b=document.getElementById("cardBack").value.trim();
+    if(!f||!b){toast("正面和背面都要填");return;}
+    var deck=findDeck(did);
+    deck.cards.push({id:uid(),front:f,phonetic:"",back:b,ex:document.getElementById("cardEx").value.trim(),level:0,due:0});
+    save();renderReview();
+    document.getElementById("cardFront").value="";document.getElementById("cardBack").value="";document.getElementById("cardEx").value="";
+    toast("已加入 "+deck.name);
+  }
+  function delDeck(did){
+    if(!confirm("删除整个卡组？组内卡片会一起删。"))return;
+    state.review.decks=state.review.decks.filter(function(d){return d.id!==did;});
+    save();renderReview();
+  }
+
+  // ---------- 启动 ----------
+  document.getElementById("goalInput").value=state.dailyGoalMin;
+  if(state.session){ // 恢复进行中的计时
+    document.getElementById("startBtn").textContent="结束并种下";
+    tickTimer();timer=setInterval(tickTimer,1000);
+  }
+  renderToday();renderRecords();
+})();
+</script>
+</body>
+</html>
